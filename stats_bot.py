@@ -41,6 +41,12 @@ except FileNotFoundError:
         with open(DISCORD_BOT_TOKEN_FILE, "w") as f:
             f.write(token)
         print(f"Created discord token file: {DISCORD_BOT_TOKEN_FILE}")
+    print(f"\nGo edit {CONFIG_FILE} before running this again!\nExiting...")
+    exit()
+except Exception as e:
+    print(f"Error loading config file {CONFIG_FILE}: {e}. \nMake sure your json is correctly formted!")
+    print(f"\nGo edit {CONFIG_FILE} before running this again!\nExiting...")
+    exit()
 
 try:
     with open(DISCORD_BOT_TOKEN_FILE, "r") as f:
@@ -49,9 +55,7 @@ except FileNotFoundError:
     DISCORD_BOT_TOKEN = input(f"Discord bot token missing (file .discord_token.key doesn't exist):\nEnter discord bot token: ")
     with open(DISCORD_BOT_TOKEN_FILE, "w") as f:
         f.write(DISCORD_BOT_TOKEN)
-except Exception as e:
-    print(f"Error loading config file {CONFIG_FILE}: {e}. \nMake sure your json is correctly formted!")
-
+    
 
 
 async def send_message(client, session: aiohttp.ClientSession, targets:list, message=None):
