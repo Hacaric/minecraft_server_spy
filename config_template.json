@@ -8,6 +8,6 @@
     "report_targets":[
         {"target_type":"USER", "target_id":USER_ID},
         {"target_type":"CHANNEL", "target_id":CHANNEL_ID},
-        {"target_type":"WEBHOOK", "target_id":WEBHOOK_URL}
+        {"target_type":"WEBHOOK", "target_id":WEBHOOK_UR, "bot_name":SHOWN_NAME}
     ]
 }

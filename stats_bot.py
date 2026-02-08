@@ -77,7 +77,7 @@ async def send_message(client, session: aiohttp.ClientSession, targets:list, mes
                     print(f"Error sending message to channel {target['target_id']}: {e}")
             elif target["target_type"] == "WEBHOOK":
                 try:
-                    data = {"content": message}
+                    data = {"content": message, "username": target['bot_name']}
                     async with session.post(target["target_id"], json=data) as response:
                         response.raise_for_status()
                 except (aiohttp.ClientError, asyncio.TimeoutError) as http_error:
