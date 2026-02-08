@@ -5,6 +5,7 @@
 #
 
 DISCORD_BOT_TOKEN_FILE = ".discord_token.key"
+CONFIG_TEMPLATE_FILE = "config_template.json"
 CONFIG_FILE = "config.json"
 
 DISCORD_BOT_TOKEN = None
@@ -20,19 +21,26 @@ import time
 import aiohttp
 import json
 import asyncio
-import psutil
-import subprocess
 import os
 from datetime import datetime
-import threading
 
 
 try:
     with open(CONFIG_FILE, "r") as f:
         CONFIG = json.load(f)
-except Exception as e:
-    print(f"Error loading config.json, probably doesn't exist: {e}")
+except FileNotFoundError:
+    print(f"Error loading {CONFIG_FILE}, file doesn't exist.")
     print(f"\nWelcome to Minecraft server spy, a simple utility for monitoring player connection times on a Minecraft server.\nTo start, create config.json using template in config_template.json and enter your discord bot token to .discord_token.key.")
+    if input(f"Create config files? (y/n)> ")[0] == "y":
+        with open(CONFIG_TEMPLATE_FILE, "r") as f:
+            with open(CONFIG_FILE, "w") as f2:
+                f2.write(f.read())
+        print(f"Copyed {CONFIG_TEMPLATE_FILE} into {CONFIG_FILE}. Please edit config.json before running this script again.")
+    if input(f"Add discord bot token? (y/n)")[0] == "y":
+        token = input("Enter discord bot token: ")
+        with open(DISCORD_BOT_TOKEN_FILE, "w") as f:
+            f.write(token)
+        print(f"Created discord token file: {DISCORD_BOT_TOKEN_FILE}")
 
 try:
     with open(DISCORD_BOT_TOKEN_FILE, "r") as f:
@@ -41,6 +49,8 @@ except FileNotFoundError:
     DISCORD_BOT_TOKEN = input(f"Discord bot token missing (file .discord_token.key doesn't exist):\nEnter discord bot token: ")
     with open(DISCORD_BOT_TOKEN_FILE, "w") as f:
         f.write(DISCORD_BOT_TOKEN)
+except Exception as e:
+    print(f"Error loading config file {CONFIG_FILE}: {e}. \nMake sure your json is correctly formted!")
 
 
 
