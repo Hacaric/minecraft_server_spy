@@ -1,0 +1,13 @@
+{
+    "minecraft_server_url":MINECRAFT_SERVER_URL,
+    "minecraft_server_port":25565,
+    "IDLE_CHECK_DELAY": 120,
+    "ACTIVE_CHECK_DELAY": 15,
+    "INACTIVITY_THRESHOLD_SECONDS": 300,
+    "online_check_reference":"https://google.com",
+    "report_targets":[
+        {"target_type":"USER", "target_id":USER_ID},
+        {"target_type":"CHANNEL", "target_id":CHANNEL_ID},
+        {"target_type":"WEBHOOK", "target_id":WEBHOOK_URL}
+    ]
+}
