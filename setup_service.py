@@ -64,8 +64,8 @@ if __name__ == "__main__":
     create_service()
     print(f"\nDone setting up your service. If you haven't ran the script yet, make sure you setup everything correctly! You should now run the script to verify if it's working.")
     if input("Do you want to run minecraft_spy_bot.py to verify it's working properly? (y/n): ")[0] == "y":
-        print("Executing: {sys.executable} {SCRIPT_PATH}\n")
+        print(f"Executing: {sys.executable} {SCRIPT_PATH}\n")
         import subprocess
-        subprocess.Popen(["{sys.executable} {SCRIPT_PATH}"])
+        subprocess.Popen([f"{sys.executable} {SCRIPT_PATH}"])
     else:
         print("Exiting...")
