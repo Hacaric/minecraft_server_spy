@@ -64,8 +64,32 @@ if __name__ == "__main__":
     create_service()
     print(f"\nDone setting up your service. If you haven't ran the script yet, make sure you setup everything correctly! You should now run the script to verify if it's working.")
     if input("Do you want to run minecraft_spy_bot.py to verify it's working properly? (y/n): ")[0] == "y":
-        print(f"Executing: {SCRIPT_PATH}\n")
-        import minecraft_spy_bot
-        minecraft_spy_bot.main()
+        print(f"Importing required modules...")
+        run = True
+        try:
+            import mcstatus
+            print("[Ok] mcstatus module found!")
+        except:
+            print("[Fail] mcstatus module missing!")
+            run = False
+        try:
+            import discord
+            print("[Ok] discord module found!")
+        except:
+            print("[Fail] discord module missing!")
+            run = False
+        try:
+            import aiohttp
+            print("[Ok] aiohttp module found!")
+        except:
+            print("[Fail] aiohttp module missing!")
+            run = False
+
+        if run:
+            print("All modules are installed. Executing minecraft_spy_bot.main()")
+            import minecraft_spy_bot
+            minecraft_spy_bot.main()
+        else:
+            print("Some modules are missing. Install them before running minecraft_spy_bot!\nInstall them using `pip install -r requirements.txt`.")
     else:
         print("Exiting...")
