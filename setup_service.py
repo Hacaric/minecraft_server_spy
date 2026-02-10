@@ -66,6 +66,6 @@ if __name__ == "__main__":
     if input("Do you want to run minecraft_spy_bot.py to verify it's working properly? (y/n): ")[0] == "y":
         print(f"Executing: {sys.executable} {SCRIPT_PATH}\n")
         import subprocess
-        subprocess.Popen([f"{sys.executable} {SCRIPT_PATH}"])
+        subprocess.Popen([f"{sys.executable}", f"{SCRIPT_PATH}"])
     else:
         print("Exiting...")
