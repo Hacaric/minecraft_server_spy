@@ -20,6 +20,7 @@ if input(f"Confirm service name: ") != SERVICE_NAME:
     sys.exit(1)
 SERVICE_FILE = f"/etc/systemd/system/{SERVICE_NAME}.service"
 SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "minecraft_spy_bot.py")
+REQUIREMENTS_CHECK_SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "check_requirements.py")
 # USER = os.getenv("USER")
 USER = input(f"The service os owned by root by default, but it has limited access to user-installed python packages. Pick user that has requirements installed.\nWhich user do you want to own the service (make sure it has correct python packages installed)? >> ")
 if input("Confirm username >> ") != USER:
@@ -71,35 +72,12 @@ def create_service():
 
 if __name__ == "__main__":
     create_service()
-
     print(f"\nDone setting up your service. If you haven't ran the script yet, make sure you setup everything correctly! You should now run the script to verify if it's working.")
-    if input("Do you want to run minecraft_spy_bot.py to verify it's working properly? (y/n): ")[0] == "y":
-        print(f"Importing required modules...\n")
-        run = True
-        try:
-            import mcstatus
-            print("[Ok] mcstatus module found!")
-        except:
-            print("[Fail] mcstatus module missing!")
-            run = False
-        try:
-            import discord
-            print("[Ok] discord module found!")
-        except:
-            print("[Fail] discord module missing!")
-            run = False
-        try:
-            import aiohttp
-            print("[Ok] aiohttp module found!")
-        except:
-            print("[Fail] aiohttp module missing!")
-            run = False
-
-        if run:
-            print("\nAll modules are installed. Executing minecraft_spy_bot.main()")
-            import minecraft_spy_bot
-            minecraft_spy_bot.main()
-        else:
-            print("\nSome modules are missing. Install them before running minecraft_spy_bot!\nInstall them using `pip install -r requirements.txt`.")
+    if input("Do you want to to verify script is working properly? (y/n): ")[0] == "y":
+        return_code:subprocess.CompletedProcess[bytes] = subprocess.run([sys.executable, REQUIREMENTS_CHECK_SCRIPT_PATH], user=USER, check=True)
+        if return_code.returncode:
+            print("Executing minecraft_spy_bot.main()...")
+            import subprocess
+            subprocess.run([sys.executable, SCRIPT_PATH], user=USER, check=True)
     else:
         print("Exiting...")
