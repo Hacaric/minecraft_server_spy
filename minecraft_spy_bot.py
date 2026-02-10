@@ -198,26 +198,26 @@ def log(*msg, statisctics = False):
         else:
             print(final_message)
 
-if __name__ == "__main__":
-    setup_logger()
+async def initial_internet_check(config_ref):
+    log(f"Waiting for internet access... (reference: {config_ref})")
+    online = False
+    while not online:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(config_ref) as response:
+                    response.raise_for_status()
+            online = True
+            log("Came online!")
+            return True
+        except (aiohttp.ClientError, asyncio.TimeoutError) as http_error:
+            log(f"Internet check failed: {http_error}")
+        except Exception as e:
+            log(f"Unexpected error during internet check: {e}")
+        await asyncio.sleep(5) # Add a small delay between retries
+    return False
 
-    async def initial_internet_check(config_ref):
-        log(f"Waiting for internet access... (reference: {config_ref})")
-        online = False
-        while not online:
-            try:
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(config_ref) as response:
-                        response.raise_for_status()
-                online = True
-                log("Came online!")
-                return True
-            except (aiohttp.ClientError, asyncio.TimeoutError) as http_error:
-                log(f"Internet check failed: {http_error}")
-            except Exception as e:
-                log(f"Unexpected error during internet check: {e}")
-            await asyncio.sleep(5) # Add a small delay between retries
-        return False
+def main():
+    setup_logger()
 
     try:
         # Run the initial internet check asynchronously
@@ -231,3 +231,6 @@ if __name__ == "__main__":
         print(f"Error: {e} - Closing log files...")
         log_file.close()
         stats_file.close()
+
+if __name__ == "__main__":
+    main()
