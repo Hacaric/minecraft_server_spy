@@ -11,7 +11,7 @@ Before you use it make sure you have permition from the server owner and/or its 
 3. Install required python packages using pip: `mcstatus`, `discord`, `aiohttp`
 `pip install -r requirements.txt` or `pip3 install -r requirements.txt`
 4. Run scipt: `python minecraft_spy_bot.py` or `python3 minecraft_spy_bot.py` or `py minecraft_spy_bot.py`
-5. _(Optional, Linux only, for systemd)_ Setup systemd service that runs the script on startup using: `sudo setup_service.py`
+5. _(Optional, Linux only, for systemd)_ Setup systemd service that runs the script on startup using: `sudo python setup_service.py`
 
 ## What will happen after running
 

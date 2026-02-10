@@ -12,7 +12,9 @@ if os.geteuid() != 0:
     sys.exit(1)
 
 
-SERVICE_NAME = input("Enter service name: ")
+SERVICE_NAME = input("Enter service name (default:minecraft_server_spy): ")
+if SERVICE_NAME == "":
+    SERVICE_NAME = "minecraft_server_spy"
 if input(f"Confirm service name: ") != SERVICE_NAME:
     print("Name doesn't match: Aborting...")
     exit()
@@ -60,3 +62,10 @@ def create_service():
 
 if __name__ == "__main__":
     create_service()
+    print(f"\nDone setting up your service. If you haven't ran the script yet, make sure you setup everything correctly! You should now run the script to verify if it's working.")
+    if input("Do you want to run minecraft_spy_bot.py to verify it's working properly? (y/n): ")[0] == "y":
+        print("Executing: {sys.executable} {SCRIPT_PATH}\n")
+        import subprocess
+        subprocess.Popen(["{sys.executable} {SCRIPT_PATH}"])
+    else:
+        print("Exiting...")
