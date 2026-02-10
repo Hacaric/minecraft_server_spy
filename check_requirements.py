@@ -1,8 +1,8 @@
 import sys
 import os
 
-# Warn if running as root
-if os.getenv("USER") == "root":
+# Warn if running as root and not running from setup_service.py (which gives username as argument)
+if os.getenv("USER") == "root" and len(sys.argv) <= 1:
     print("Warning! This script is running as root.")
     print("Root may not have access to user-installed packages.")
     print("If this is during setup_service, ensure your service has `[User]=yourname` to run as a regular user.\n")
