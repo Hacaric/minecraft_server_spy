@@ -218,7 +218,7 @@ async def initial_internet_check(config_ref):
 
 def main():
     setup_logger()
-
+    print(f"Running as user {os.getenv("USER")}")
     try:
         # Run the initial internet check asynchronously
         asyncio.run(initial_internet_check(CONFIG['online_check_reference']))

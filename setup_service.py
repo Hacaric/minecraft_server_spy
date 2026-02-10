@@ -11,7 +11,7 @@ if os.geteuid() != 0:
     print("Error: This script must be run as root (use sudo)")
     sys.exit(1)
 
-
+print(f"Running as user {os.getenv("USER")}")
 SERVICE_NAME = input("Enter service name (default:minecraft_server_spy): ")
 if SERVICE_NAME == "":
     SERVICE_NAME = "minecraft_server_spy"

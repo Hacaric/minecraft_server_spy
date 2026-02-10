@@ -1,4 +1,5 @@
-import sys
+import sys, os
+print(f"Running as user {os.getenv("USER")}")
 print(f"Checking required modules...\n")
 run = True
 try:
