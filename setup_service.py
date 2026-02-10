@@ -17,10 +17,19 @@ if SERVICE_NAME == "":
     SERVICE_NAME = "minecraft_server_spy"
 if input(f"Confirm service name: ") != SERVICE_NAME:
     print("Name doesn't match: Aborting...")
-    exit()
+    sys.exit(1)
 SERVICE_FILE = f"/etc/systemd/system/{SERVICE_NAME}.service"
 SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "minecraft_spy_bot.py")
-USER = os.getenv("USER")
+# USER = os.getenv("USER")
+USER = input(f"The service os owned by root by default, but it has limited access to user-installed python packages. Pick user that has requirements installed.\nWhich user do you want to own the service (make sure it has correct python packages installed)? >> ")
+if input("Confirm username >> ") != USER:
+    print("Name doesn't match: Aborting...")
+    sys.exit(1)
+# # This is for importing user packages 
+# user_site_packages = os.path.expanduser('~/.local/lib/python3.13/site-packages')
+# if user_site_packages not in sys.path:
+#     sys.path.append(user_site_packages)
+
 
 SERVICE_CONTENT = f"""[Unit]
 Description=Minecraft Spy Bot Service
@@ -33,7 +42,7 @@ User={USER}
 WorkingDirectory={os.path.dirname(SCRIPT_PATH)}
 ExecStart={sys.executable} {SCRIPT_PATH}
 Restart=on-failure
-RestartSec=10
+RestartSec=30
 
 [Install]
 WantedBy=multi-user.target
@@ -62,9 +71,10 @@ def create_service():
 
 if __name__ == "__main__":
     create_service()
+
     print(f"\nDone setting up your service. If you haven't ran the script yet, make sure you setup everything correctly! You should now run the script to verify if it's working.")
     if input("Do you want to run minecraft_spy_bot.py to verify it's working properly? (y/n): ")[0] == "y":
-        print(f"Importing required modules...")
+        print(f"Importing required modules...\n")
         run = True
         try:
             import mcstatus
@@ -86,10 +96,10 @@ if __name__ == "__main__":
             run = False
 
         if run:
-            print("All modules are installed. Executing minecraft_spy_bot.main()")
+            print("\nAll modules are installed. Executing minecraft_spy_bot.main()")
             import minecraft_spy_bot
             minecraft_spy_bot.main()
         else:
-            print("Some modules are missing. Install them before running minecraft_spy_bot!\nInstall them using `pip install -r requirements.txt`.")
+            print("\nSome modules are missing. Install them before running minecraft_spy_bot!\nInstall them using `pip install -r requirements.txt`.")
     else:
         print("Exiting...")
