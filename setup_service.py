@@ -27,9 +27,9 @@ if input("Confirm username >> ") != USER:
     print("Name doesn't match: Aborting...")
     sys.exit(1)
 # # This is for importing user packages 
-# user_site_packages = os.path.expanduser('~/.local/lib/python3.13/site-packages')
-# if user_site_packages not in sys.path:
-#     sys.path.append(user_site_packages)
+user_site_packages = os.path.expanduser(f'/home/{USER}/.local/lib/python3.13/site-packages')
+if user_site_packages not in sys.path:
+    sys.path.append(user_site_packages)
 
 
 SERVICE_CONTENT = f"""[Unit]
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     create_service()
     print(f"\nDone setting up your service. If you haven't ran the script yet, make sure you setup everything correctly! You should now run the script to verify if it's working.")
     if input("Do you want to to verify script is working properly? (y/n): ")[0] == "y":
-        return_code:subprocess.CompletedProcess[bytes] = subprocess.run([sys.executable, REQUIREMENTS_CHECK_SCRIPT_PATH], user=USER, check=True)
+        return_code:subprocess.CompletedProcess[bytes] = subprocess.run([sys.executable, REQUIREMENTS_CHECK_SCRIPT_PATH, USER], user=USER, check=True)
         if return_code.returncode:
             print("Executing minecraft_spy_bot.main()...")
             import subprocess

@@ -1,5 +1,8 @@
 import sys, os
-print(f"Running as user {os.getenv("USER")}")
+print(f"Running as user {os.getenv("USER")}, should be running as {sys.argv[2]}")
+user_site_packages = os.path.expanduser(f'/home/{sys.argv[2]}/.local/lib/python3.13/site-packages')
+if user_site_packages not in sys.path:
+    sys.path.append(user_site_packages)
 print(f"Checking required modules...\n")
 run = True
 try:
