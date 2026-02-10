@@ -30,7 +30,7 @@ try:
         CONFIG = json.load(f)
 except FileNotFoundError:
     print(f"Error loading {CONFIG_FILE}, file doesn't exist.")
-    print(f"\nWelcome to Minecraft server spy, a simple utility for monitoring player connection times on a Minecraft server.\nTo start, create config.json using template in config_template.json and enter your discord bot token to .discord_token.key.")
+    print(f"\nWelcome to Minecraft server spy, a simple utility for monitoring player connections on a Minecraft server.\nTo start, create config.json using template in config_template.json and enter your discord bot token to .discord_token.key.")
     if input(f"Create config files? (y/n)> ")[0] == "y":
         with open(CONFIG_TEMPLATE_FILE, "r") as f:
             with open(CONFIG_FILE, "w") as f2:
@@ -111,8 +111,7 @@ def run_discord_bot():
 async def server_status_check(client, CONFIG):
     server = await JavaServer.async_lookup(f"{CONFIG["minecraft_server_url"]}:{CONFIG["minecraft_server_port"]}")
     targets = CONFIG["report_targets"]
-    log(CONFIG)
-    log(targets[0])
+    log(f"Stasting status check with config: {CONFIG}")
     LAST_PLAYER_STATUS = 99999
     LAST_ONLINE_PLAYER_TIME = 0
     i = 0
