@@ -72,12 +72,6 @@ def create_service():
 
 if __name__ == "__main__":
     create_service()
+    if input(f"Do you want to to verify that packages are installed correctly for user {USER}? (y/n): ")[0] == "y":
+        subprocess.run([sys.executable, REQUIREMENTS_CHECK_SCRIPT_PATH, USER], user=USER, check=True)
     print(f"\nDone setting up your service. If you haven't ran the script yet, make sure you setup everything correctly! You should now run the script to verify if it's working.")
-    if input("Do you want to to verify script is working properly? (y/n): ")[0] == "y":
-        return_code:subprocess.CompletedProcess[bytes] = subprocess.run([sys.executable, REQUIREMENTS_CHECK_SCRIPT_PATH, USER], user=USER, check=True)
-        if return_code.returncode:
-            print("Executing minecraft_spy_bot.main()...")
-            import subprocess
-            subprocess.run([sys.executable, SCRIPT_PATH], user=USER, check=True)
-    else:
-        print("Exiting...")
