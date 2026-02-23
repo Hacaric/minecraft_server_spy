@@ -4,9 +4,11 @@
 #
 #
 
+import os
 DISCORD_BOT_TOKEN_FILE = ".discord_token.key"
-CONFIG_TEMPLATE_FILE = "config_template.json"
-CONFIG_FILE = "config.json"
+project_dir = os.path.dirname(__file__)
+CONFIG_TEMPLATE_FILE = os.path.join(project_dir, "config_template.json")
+CONFIG_FILE = os.path.join(project_dir, "config.json")
 
 DISCORD_BOT_TOKEN = None
 USER_REPORT_ID = None
@@ -21,7 +23,6 @@ import time
 import aiohttp
 import json
 import asyncio
-import os
 from datetime import datetime
 
 
@@ -161,16 +162,18 @@ def setup_logger():
     now = datetime.now()
     formatted_date_time = now.strftime("%d-%m-%Y_%H-%M")
     # log_file_name = f"log_{formatted_date_time}.txt"
-    # log_file = open(os.path.join(os.path.dirname(__file__), "log", log_file_name), "wt")
+    # log_file = open(os.path.join(project_dir, "log", log_file_name), "wt")
     # stats_file_name = f"statisctic_{formatted_date_time}.txt"
-    # stats_file = open(os.path.join(os.path.dirname(__file__), "stats", stats_file_name), "wt")
-    if not os.path.exists(os.path.join(os.path.dirname(__file__), "log")):
-        os.makedirs(os.path.join(os.path.dirname(__file__), "log"))
-    log_file_name = os.path.join(os.path.dirname(__file__), "log", f"log_{formatted_date_time}.txt")
+    # stats_file = open(os.path.join(project_dir, "stats", stats_file_name), "wt")
+    logs_dir = os.path.join(project_dir, "log")
+    if not os.path.exists(logs_dir):
+        os.makedirs(logs_dir)
+    log_file_name = os.path.join(logs_dir, f"log_{formatted_date_time}.txt")
     log_file = open(log_file_name, "wt")
-    if not os.path.exists(os.path.join(os.path.dirname(__file__), "stats")):
-        os.makedirs(os.path.join(os.path.dirname(__file__), "stats"))
-    stats_file_name = os.path.join(os.path.dirname(__file__), "stats", f"statisctic_{formatted_date_time}.txt")
+    statistics_dir = os.path.join(project_dir, "stats")
+    if not os.path.exists(statistics_dir):
+        os.makedirs(statistics_dir)
+    stats_file_name = os.path.join(statistics_dir, f"statisctic_{formatted_date_time}.txt")
     stats_file = open(stats_file_name, "wt")
 
 def log(*msg, statisctics = False):
