@@ -5,8 +5,8 @@
 #
 
 import os
-DISCORD_BOT_TOKEN_FILE = ".discord_token.key"
 project_dir = os.path.dirname(__file__)
+DISCORD_BOT_TOKEN_FILE = os.path.join(project_dir, ".discord_token.key")
 CONFIG_TEMPLATE_FILE = os.path.join(project_dir, "config_template.json")
 CONFIG_FILE = os.path.join(project_dir, "config.json")
 
@@ -49,17 +49,20 @@ except Exception as e:
     print(f"\nGo edit {CONFIG_FILE} before running this again!\nExiting...")
     exit()
 
-try:
-    with open(DISCORD_BOT_TOKEN_FILE, "r") as f:
-        DISCORD_BOT_TOKEN = f.readlines()[0]
-except FileNotFoundError:
-    DISCORD_BOT_TOKEN = input(f"Discord bot token missing (file .discord_token.key doesn't exist):\nEnter discord bot token: ")
-    with open(DISCORD_BOT_TOKEN_FILE, "w") as f:
-        f.write(DISCORD_BOT_TOKEN)
+target_types = [i.get("target_type") for i in CONFIG["report_targets"]]
+USING_DISCORD_BOT = "USER" in target_types or "CHANNEL" in target_types
+if USING_DISCORD_BOT:
+    try:
+        with open(DISCORD_BOT_TOKEN_FILE, "r") as f:
+            DISCORD_BOT_TOKEN = f.readlines()[0]
+    except FileNotFoundError:
+        DISCORD_BOT_TOKEN = input(f"Discord bot token missing (file .discord_token.key doesn't exist):\nEnter discord bot token: ")
+        with open(DISCORD_BOT_TOKEN_FILE, "w") as f:
+            f.write(DISCORD_BOT_TOKEN)
     
 
 
-async def send_message(client, session: aiohttp.ClientSession, targets:list, message=None):
+async def send_message(client, session: aiohttp.ClientSession, targets:list[dict], message=None):
     try:
         for target in targets:
             if target["target_type"] == "USER":
@@ -78,7 +81,8 @@ async def send_message(client, session: aiohttp.ClientSession, targets:list, mes
                     print(f"Error sending message to channel {target['target_id']}: {e}")
             elif target["target_type"] == "WEBHOOK":
                 try:
-                    data = {"content": message, "username": target['bot_name']}
+                    username = target.get('bot_name', "Minectaft Server Monitor")
+                    data = {"content": message, "username": username}
                     async with session.post(target["target_id"], json=data) as response:
                         response.raise_for_status()
                 except (aiohttp.ClientError, asyncio.TimeoutError) as http_error:
@@ -118,6 +122,7 @@ async def server_status_check(client, CONFIG):
     i = 0
     async with aiohttp.ClientSession() as session:
         await send_message(client, session, targets, f"Bot started...")
+        
         RETRIES = 0
 
         while True:
@@ -225,7 +230,10 @@ def main():
     try:
         # Run the initial internet check asynchronously
         asyncio.run(initial_internet_check(CONFIG['online_check_reference']))
-        run_discord_bot()
+        if USING_DISCORD_BOT:
+            run_discord_bot()
+        else:
+            asyncio.run(server_status_check(None, CONFIG))
     except KeyboardInterrupt:
         print("KeyboardInterrupt - Closing log files...")
         log_file.close()

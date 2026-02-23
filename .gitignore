@@ -1,2 +1,4 @@
 .discord_token.key
 config.json
+log/*
+stats/*
