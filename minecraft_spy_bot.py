@@ -12,7 +12,7 @@ CONFIG_FILE = os.path.join(project_dir, "config.json")
 
 DISCORD_BOT_TOKEN = None
 USER_REPORT_ID = None
-
+AioHttp_SESSION = aiohttp.ClientSession()
 
 
 from mcstatus import JavaServer
@@ -64,37 +64,72 @@ if USING_DISCORD_BOT:
 
 async def send_message(client, session: aiohttp.ClientSession, targets:list[dict], message=None):
     log(f"Sending message `{message}` to targets: {targets}")
-    try:
-        for target in targets:
-            if target["target_type"] == "USER":
+    if not targets:
+        return
+
+    for target in targets:
+        target_id = target.get("target_id")
+        target_type = target.get("target_type")
+        
+        try:
+            if target_type == "USER":
+                if not client:
+                    log(f"Error: Cannot send to USER {target_id} because Discord client is not initialized.")
+                    continue
+                
+                # Check cache first, then fetch
+                user = client.get_user(int(target_id))
+                if not user:
+                    try:
+                        user = await client.fetch_user(int(target_id))
+                    except (discord.NotFound, ValueError):
+                        log(f"Error: User with ID {target_id} not found or invalid ID.")
+                        continue
+                    except discord.HTTPException as e:
+                        log(f"Error: Failed to fetch user {target_id} from Discord API: {e}")
+                        continue
+                
+                if user:
+                    await user.send(message)
+                else:
+                    log(f"Error: Could not retrieve user {target_id}")
+
+            elif target_type == "CHANNEL":
+                if not client:
+                    log(f"Error: Cannot send to CHANNEL {target_id} because Discord client is not initialized.")
+                    continue
+
+                channel = client.get_channel(int(target_id))
+                if not channel:
+                    try:
+                        channel = await client.fetch_channel(int(target_id))
+                    except (discord.NotFound, ValueError):
+                        log(f"Error: Channel with ID {target_id} not found or invalid ID.")
+                        continue
+                    except discord.HTTPException as e:
+                        log(f"Error: Failed to fetch channel {target_id} from Discord API: {e}")
+                        continue
+                
+                if channel:
+                    await channel.send(message)
+                else:
+                    log(f"Error: Could not retrieve channel {target_id}")
+
+            elif target_type == "WEBHOOK":
                 try:
-                    user = client.get_user(target["target_id"])
-                    if user:
-                        await user.send(message)
-                except Exception as e:
-                    print(f"Error sending message to user {target['target_id']}: {e}")
-            elif target["target_type"] == "CHANNEL":
-                try:
-                    channel = client.get_channel(target["target_id"])
-                    if channel:
-                        await channel.send(message)
-                except Exception as e:
-                    print(f"Error sending message to channel {target['target_id']}: {e}")
-            elif target["target_type"] == "WEBHOOK":
-                try:
-                    username = target.get('bot_name', "Minectaft Server Monitor")
+                    username = target.get('bot_name', "Minecraft Server Monitor")
                     data = {"content": message, "username": username}
-                    async with session.post(target["target_id"], json=data) as response:
+                    async with session.post(target_id, json=data) as response:
                         response.raise_for_status()
                 except (aiohttp.ClientError, asyncio.TimeoutError) as http_error:
-                    print(f"Error sending message to webhook {target['target_id']}: {http_error}")
+                    log(f"Error sending message to webhook {target_id}: {http_error}")
                 except Exception as e:
-                    print(f"Error sending message to webhook {target['target_id']}: {e}")
+                    log(f"Error sending message to webhook {target_id}: {e}")
             else:
-                print(f"Unknown target type: {target['target_type']}")
+                log(f"Error: Unknown target type: {target_type}")
 
-    except Exception as e:
-        log(f"Error sending message: {e}")
+        except Exception as e:
+            log(f"Unexpected error sending message to {target_type} ({target_id}): {e}")
 
 async def track_my_ip_changes(IP_TRACKER_CONFIG, client, session):
     last_ip_file = os.path.join(project_dir, "public_ip.txt")
@@ -128,13 +163,20 @@ def run_discord_bot():
     
         intents1 = discord.Intents.all()
         client = commands.Bot(command_prefix="/", intents=intents1)
+        client.started = False
 
         @client.event
         async def on_ready():
-            log(f'{client.user} is now running')
-            client.loop.create_task(server_status_check(client, CONFIG))
-            if CONFIG.get("ip_tracker").get("track_my_ip_changes"):
-                client.loop.create_task(track_my_ip_changes(CONFIG["ip_tracker"], client, aiohttp.ClientSession()))
+            if not client.started:
+                client.started = True
+                log(f'{client.user} is now running')
+                client.loop.create_task(server_status_check(client, CONFIG))
+                if CONFIG.get("ip_tracker").get("track_my_ip_changes"):
+                    # Note: We are still creating a new session here; 
+                    # ideally, a shared session should be managed at the bot level.
+                    client.loop.create_task(track_my_ip_changes(CONFIG["ip_tracker"], client, AioHttp_SESSION))
+            else:
+                log(f'{client.user} reconnected')
 
         client.run(DISCORD_BOT_TOKEN)
     except Exception as e:
@@ -149,7 +191,7 @@ async def server_status_check(client, CONFIG):
     LAST_PLAYER_STATUS = 99999
     LAST_ONLINE_PLAYER_TIME = 0
     i = 0
-    async with aiohttp.ClientSession() as session:
+    async with AioHttp_SESSION as session:
         await send_message(client, session, targets, f"Bot started...")
         
         RETRIES = 0
@@ -240,7 +282,7 @@ async def initial_internet_check(config_ref):
     online = False
     while not online:
         try:
-            async with aiohttp.ClientSession() as session:
+            async with AioHttp_SESSION as session:
                 async with session.get(config_ref) as response:
                     response.raise_for_status()
             online = True
