@@ -63,6 +63,7 @@ if USING_DISCORD_BOT:
 
 
 async def send_message(client, session: aiohttp.ClientSession, targets:list[dict], message=None):
+    log(f"Sending message `{message}` to targets: {targets}")
     try:
         for target in targets:
             if target["target_type"] == "USER":
@@ -95,6 +96,32 @@ async def send_message(client, session: aiohttp.ClientSession, targets:list[dict
     except Exception as e:
         log(f"Error sending message: {e}")
 
+async def track_my_ip_changes(IP_TRACKER_CONFIG, client, session):
+    last_ip_file = os.path.join(project_dir, "public_ip.txt")
+    if os.path.exists(last_ip_file):
+        with open(last_ip_file, "r") as f:
+            current_ip = f.read()
+    else:
+        current_ip = ""
+    reference_url = IP_TRACKER_CONFIG.get("my_ip_reference")
+    check_delay = IP_TRACKER_CONFIG.get("my_ip_change_check_delay_seconds")
+    while True:
+        log("Checking ip...")
+        try:
+            async with session.get(reference_url) as response:
+                new_ip = await response.text()
+            if current_ip != new_ip:
+                await send_message(client, session, IP_TRACKER_CONFIG.get("report_targets", []), f"My IP changed to {new_ip}")
+                with open(last_ip_file, "w") as f:
+                    f.write(str(new_ip))
+                log(f"Ip changed to {new_ip}.")
+                current_ip = new_ip
+            else:
+                log("Ip didn't change.")
+        except Exception as e:
+            log(f"Error checking IP: {e}")
+        await asyncio.sleep(check_delay)
+
 
 def run_discord_bot():
     try:
@@ -106,6 +133,8 @@ def run_discord_bot():
         async def on_ready():
             log(f'{client.user} is now running')
             client.loop.create_task(server_status_check(client, CONFIG))
+            if CONFIG.get("ip_tracker").get("track_my_ip_changes"):
+                client.loop.create_task(track_my_ip_changes(CONFIG["ip_tracker"], client, aiohttp.ClientSession()))
 
         client.run(DISCORD_BOT_TOKEN)
     except Exception as e:
@@ -223,6 +252,7 @@ async def initial_internet_check(config_ref):
             log(f"Unexpected error during internet check: {e}")
         await asyncio.sleep(5) # Add a small delay between retries
     return False
+    
 
 def main():
     setup_logger()

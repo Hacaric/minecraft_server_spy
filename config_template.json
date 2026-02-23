@@ -5,9 +5,21 @@
     "ACTIVE_CHECK_DELAY": 15,
     "INACTIVITY_THRESHOLD_SECONDS": 300,
     "online_check_reference":"https://google.com",
+    "track_my_ip_change":false,
+    "report_on_my_ip_change":false,
+    "ip_tracker":{
+        "track_my_ip_changes":false, 
+        "my_ip_change_check_delay_seconds":120,
+        "my_ip_reference":"https://ident.me",
+        "report_targets":[
+            {"target_type":"USER", "target_id":USER_ID},
+            {"target_type":"CHANNEL", "target_id":CHANNEL_ID},
+            {"target_type":"WEBHOOK", "bot_name":SHOWN_NAME, "target_id":WEBHOOK_URL}
+        ]
+    },
     "report_targets":[
         {"target_type":"USER", "target_id":USER_ID},
         {"target_type":"CHANNEL", "target_id":CHANNEL_ID},
-        {"target_type":"WEBHOOK", "target_id":WEBHOOK_UR, "bot_name":SHOWN_NAME}
+        {"target_type":"WEBHOOK", "bot_name":SHOWN_NAME, "target_id":WEBHOOK_URL}
     ]
 }
