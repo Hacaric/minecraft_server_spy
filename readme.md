@@ -8,8 +8,8 @@ Before you use it make sure you have permition from the server owner and/or its 
 
 1. Create `config.json` (use template in `config_template.py` for reference) and add your report points (discord bot/webhook)
 2. If you want to use discord bot, create `.dicord_token.key` and paste your discord bot token there.
-3. Install required python packages using pip: `mcstatus`, `discord`, `aiohttp`
-`pip install -r requirements.txt` or `pip3 install -r requirements.txt`
+3. Install required python packages using pip: `mcstatus`, `discord`, `aiohttp`.
+<br>`pip install -r requirements.txt` or `pip3 install -r requirements.txt`
 4. Run scipt: `python minecraft_spy_bot.py` or `python3 minecraft_spy_bot.py` or `py minecraft_spy_bot.py`
 5. _(Optional, Linux only, for systemd)_ Setup systemd service that runs the script on startup using: `sudo python setup_service.py`
 
