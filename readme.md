@@ -15,7 +15,7 @@ Before you use it make sure you have permition from the server owner and/or its 
 
 ## Config
 You will need to create `config.json` in order to run the program, the easiest way is to copy `config_template.json` and tweak it.
-Here is explanation of the config:
+<br>Here is explanation of the config:
 ```json
 {
     "minecraft_server_url":MINECRAFT_SERVER_URL,    // Target url or IP address
