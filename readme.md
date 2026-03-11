@@ -57,9 +57,10 @@ Example log file:
 [06:09:58] 2 ['Herobrine', 'Notch']
 [06:11:50] 1 ['Herobrine']
 [06:14:16] -1 []
+[09:30:04] -2 []
 ```
 
-- Statistic file will be created each time script runs (in `stats/` directory)
+- Statistic file will be created each time script runs (in `stats/` directory), it contains parts of the log, in pure form, good for statistic and analytic purposes
 
 ```txt
 Example statistic file:
@@ -71,8 +72,8 @@ Example statistic file:
 [09:30:04] -2 []
 ```
 
+### Explanation:
 ```txt
-Explanation:
 // First number is number of players connected, then there is a list of all players
 [06:08:02] 0 []                         // Server is empty
 [06:08:50] 1 ['Notch']                  // There 1 player connected with nickname 'Notch'
