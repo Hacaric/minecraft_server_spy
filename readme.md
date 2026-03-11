@@ -13,6 +13,33 @@ Before you use it make sure you have permition from the server owner and/or its 
 4. Run scipt: `python minecraft_spy_bot.py` or `python3 minecraft_spy_bot.py` or `py minecraft_spy_bot.py`
 5. _(Optional, Linux only, for systemd)_ Setup systemd service that runs the script on startup using: `sudo python setup_service.py`
 
+## Config
+```json
+{
+    "minecraft_server_url":MINECRAFT_SERVER_URL,    // Target url or IP address
+    "minecraft_server_port":25565,                  // Minecraft server's port, 25565 id default
+    "IDLE_CHECK_DELAY": 120,                        // How often check minecraft server when noone is connected
+    "ACTIVE_CHECK_DELAY": 15,                       // How often check minecraft server when someone is connected
+    "INACTIVITY_THRESHOLD_SECONDS": 300,            // How long has the server be empty in order to use 'IDLE_CHECK_DELAY' instead of 'ACTIVE_CHECK_DELAY'
+    "online_check_reference":"https://google.com",  // If this website is unreachable, the program declares internet connection loss
+    "report_targets":[                              // Here, messages will be sent when list of connected players changes, or the server goes online/offline
+        {"target_type":"USER", "target_id":USER_ID},
+        {"target_type":"CHANNEL", "target_id":CHANNEL_ID},
+        {"target_type":"WEBHOOK", "bot_name":SHOWN_NAME, "target_id":WEBHOOK_URL}
+    ],
+    "ip_tracker":{                                  // Useful when this program is hosted on the same network/computer as the minecraft server it is tracking and the public IP address is dynamic 
+        "track_my_ip_changes":false,                // Track my IP changes? Enables this feature. Useful when this program is hosted on same machine as the minecraft server it's tracking and the IP address is dynamic 
+        "my_ip_change_check_delay_seconds":120,
+        "my_ip_reference":"https://ident.me",       // API to get my public IP
+        "report_targets":[                          // Here, messages will be sent when IP changes, you can add more targets of the same type
+            {"target_type":"USER", "target_id":USER_ID},
+            {"target_type":"CHANNEL", "target_id":CHANNEL_ID},
+            {"target_type":"WEBHOOK", "bot_name":SHOWN_NAME, "target_id":WEBHOOK_URL}
+        ]
+    }
+}
+```
+
 ## What will happen after running
 
 - Log file will be created each time script runs (in `log/` directory)
