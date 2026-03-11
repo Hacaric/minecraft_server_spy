@@ -13,7 +13,8 @@ Before you use it make sure you have permition from the server owner and/or its 
 4. Run scipt: `python minecraft_spy_bot.py` or `python3 minecraft_spy_bot.py` or `py minecraft_spy_bot.py`
 5. _(Optional, Linux only, for systemd)_ Setup systemd service that runs the script on startup using: `sudo python setup_service.py`
 
-## Config
+## Config
+
 ```json
 {
     "minecraft_server_url":MINECRAFT_SERVER_URL,    // Target url or IP address
