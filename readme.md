@@ -1,7 +1,7 @@
 
 # Minecraft server spy
 
-Minecraft server spy is a simple utility for monitoring player connections on a Minecraft server and report to Discord.
+Minecraft server spy is a simple utility for monitoring player connections on a Minecraft server and reporting changes to Discord.
 Before you use it make sure you have permition from the server owner and/or its players.
 
 ## Usage
