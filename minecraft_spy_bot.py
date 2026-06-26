@@ -6,13 +6,10 @@
 
 import os
 project_dir = os.path.dirname(__file__)
-DISCORD_BOT_TOKEN_FILE = os.path.join(project_dir, ".discord_token.key")
+# DISCORD_BOT_TOKEN_FILE = os.path.join(project_dir, ".discord_token.key")
 CONFIG_TEMPLATE_FILE = os.path.join(project_dir, "config_template.json")
 CONFIG_FILE = os.path.join(project_dir, "config.json")
 
-DISCORD_BOT_TOKEN = None
-USER_REPORT_ID = None
-AioHttp_SESSION = aiohttp.ClientSession()
 
 
 from mcstatus import JavaServer
@@ -25,6 +22,7 @@ import json
 import asyncio
 from datetime import datetime
 
+AioHttp_SESSION = None
 
 try:
     with open(CONFIG_FILE, "r") as f:
@@ -37,11 +35,11 @@ except FileNotFoundError:
             with open(CONFIG_FILE, "w") as f2:
                 f2.write(f.read())
         print(f"Copyed {CONFIG_TEMPLATE_FILE} into {CONFIG_FILE}. Please edit config.json before running this script again.")
-    if input(f"Add discord bot token? (y/n)")[0] == "y":
-        token = input("Enter discord bot token: ")
-        with open(DISCORD_BOT_TOKEN_FILE, "w") as f:
-            f.write(token)
-        print(f"Created discord token file: {DISCORD_BOT_TOKEN_FILE}")
+    # if input(f"Add discord bot token? (y/n)")[0] == "y":
+    #     token = input("Enter discord bot token: ")
+    #     with open(DISCORD_BOT_TOKEN_FILE, "w") as f:
+    #         f.write(token)
+    #     print(f"Created discord token file: {DISCORD_BOT_TOKEN_FILE}")
     print(f"\nGo edit {CONFIG_FILE} before running this again!\nExiting...")
     exit()
 except Exception as e:
@@ -49,16 +47,23 @@ except Exception as e:
     print(f"\nGo edit {CONFIG_FILE} before running this again!\nExiting...")
     exit()
 
+DISCORD_BOT_TOKEN = CONFIG.get("DISCORD_BOT_TOKEN_optional", None)
+
 target_types = [i.get("target_type") for i in CONFIG["report_targets"]]
 USING_DISCORD_BOT = "USER" in target_types or "CHANNEL" in target_types
-if USING_DISCORD_BOT:
-    try:
-        with open(DISCORD_BOT_TOKEN_FILE, "r") as f:
-            DISCORD_BOT_TOKEN = f.readlines()[0]
-    except FileNotFoundError:
-        DISCORD_BOT_TOKEN = input(f"Discord bot token missing (file .discord_token.key doesn't exist):\nEnter discord bot token: ")
-        with open(DISCORD_BOT_TOKEN_FILE, "w") as f:
-            f.write(DISCORD_BOT_TOKEN)
+if USING_DISCORD_BOT and DISCORD_BOT_TOKEN == None:
+    print(f"config.json missing property 'DISCORD_BOT_TOKEN_optional' which is required if reporting to USER or CHANNEL")
+    exit()
+if USING_DISCORD_BOT and DISCORD_BOT_TOKEN == "":
+    print(f"Error: Trying to log to USER or CHANNEL, but no discord bot token is present. Please add a valid discord bot token or use webhooks.\nExiting...")
+    exit()
+    # try:
+    #     with open(DISCORD_BOT_TOKEN_FILE, "r") as f:
+    #         DISCORD_BOT_TOKEN = f.readlines()[0]
+    # except FileNotFoundError:
+    #     DISCORD_BOT_TOKEN = input(f"Discord bot token missing (file .discord_token.key doesn't exist):\nEnter discord bot token: ")
+    #     with open(DISCORD_BOT_TOKEN_FILE, "w") as f:
+    #         f.write(DISCORD_BOT_TOKEN)
     
 
 
@@ -131,7 +136,7 @@ async def send_message(client, session: aiohttp.ClientSession, targets:list[dict
         except Exception as e:
             log(f"Unexpected error sending message to {target_type} ({target_id}): {e}")
 
-async def track_my_ip_changes(IP_TRACKER_CONFIG, client, session):
+async def track_my_ip_changes(IP_TRACKER_CONFIG, client):
     last_ip_file = os.path.join(project_dir, "public_ip.txt")
     if os.path.exists(last_ip_file):
         with open(last_ip_file, "r") as f:
@@ -140,22 +145,24 @@ async def track_my_ip_changes(IP_TRACKER_CONFIG, client, session):
         current_ip = ""
     reference_url = IP_TRACKER_CONFIG.get("my_ip_reference")
     check_delay = IP_TRACKER_CONFIG.get("my_ip_change_check_delay_seconds")
-    while True:
-        log("Checking ip...")
-        try:
-            async with session.get(reference_url) as response:
-                new_ip = await response.text()
-            if current_ip != new_ip:
-                await send_message(client, session, IP_TRACKER_CONFIG.get("report_targets", []), f"My IP changed to {new_ip}")
-                with open(last_ip_file, "w") as f:
-                    f.write(str(new_ip))
-                log(f"Ip changed to {new_ip}.")
-                current_ip = new_ip
-            else:
-                log("Ip didn't change.")
-        except Exception as e:
-            log(f"Error checking IP: {e}")
-        await asyncio.sleep(check_delay)
+    
+    async with aiohttp.ClientSession() as session:
+        while True:
+            log("Checking ip...")
+            try:
+                async with session.get(reference_url) as response:
+                    new_ip = await response.text()
+                if current_ip != new_ip:
+                    await send_message(client, session, IP_TRACKER_CONFIG.get("report_targets", []), f"My IP changed to {new_ip}")
+                    with open(last_ip_file, "w") as f:
+                        f.write(str(new_ip))
+                    log(f"Ip changed to {new_ip}.")
+                    current_ip = new_ip
+                else:
+                    log("Ip didn't change.")
+            except Exception as e:
+                log(f"Error checking IP: {e}")
+            await asyncio.sleep(check_delay)
 
 
 def run_discord_bot():
@@ -174,7 +181,7 @@ def run_discord_bot():
                 if CONFIG.get("ip_tracker").get("track_my_ip_changes"):
                     # Note: We are still creating a new session here; 
                     # ideally, a shared session should be managed at the bot level.
-                    client.loop.create_task(track_my_ip_changes(CONFIG["ip_tracker"], client, AioHttp_SESSION))
+                    client.loop.create_task(track_my_ip_changes(CONFIG["ip_tracker"], client))
             else:
                 log(f'{client.user} reconnected')
 
@@ -191,7 +198,7 @@ async def server_status_check(client, CONFIG):
     LAST_PLAYER_STATUS = 99999
     LAST_ONLINE_PLAYER_TIME = 0
     i = 0
-    async with AioHttp_SESSION as session:
+    async with aiohttp.ClientSession() as session:
         await send_message(client, session, targets, f"Bot started...")
         
         RETRIES = 0
@@ -282,7 +289,7 @@ async def initial_internet_check(config_ref):
     online = False
     while not online:
         try:
-            async with AioHttp_SESSION as session:
+            async with aiohttp.ClientSession() as session:
                 async with session.get(config_ref) as response:
                     response.raise_for_status()
             online = True

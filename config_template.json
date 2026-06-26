@@ -5,6 +5,7 @@
     "ACTIVE_CHECK_DELAY": 15,                     
     "INACTIVITY_THRESHOLD_SECONDS": 300,           
     "online_check_reference":"https://google.com", 
+    "DISCORD_BOT_TOKEN_optional":"",
     "report_targets":[                              
         {"target_type":"USER", "target_id":USER_ID},
         {"target_type":"CHANNEL", "target_id":CHANNEL_ID},
